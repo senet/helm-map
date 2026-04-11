@@ -1,0 +1,4 @@
+apiVersion: v2
+name: local-lib
+version: 0.1.0
+description: A local library chart referenced via file://

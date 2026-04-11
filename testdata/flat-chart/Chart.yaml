@@ -1,0 +1,11 @@
+apiVersion: v2
+name: flat-chart
+version: 0.1.0
+description: A flat chart with no nested dependencies
+dependencies:
+  - name: nginx
+    version: "13.2.0"
+    repository: "https://charts.bitnami.com/bitnami"
+  - name: memcached
+    version: "6.6.0"
+    repository: "https://charts.bitnami.com/bitnami"

@@ -1,0 +1,24 @@
+name: "map"
+version: "0.1.0"
+usage: "Visualize Helm chart dependency and release resource maps"
+description: |-
+  helm-map generates dependency graphs for charts and resource maps
+  for live releases. Output formats: terminal tree, DOT, SVG, JSON.
+command: "$HELM_PLUGIN_DIR/bin/helm-map"
+hooks:
+  install: "scripts/install.sh"
+  update: "scripts/install.sh"
+ignoreFlags: false
+platformCommand:
+  - os: windows
+    arch: amd64
+    command: "$HELM_PLUGIN_DIR/bin/helm-map.exe"
+  - os: linux
+    arch: amd64
+    command: "$HELM_PLUGIN_DIR/bin/helm-map"
+  - os: darwin
+    arch: arm64
+    command: "$HELM_PLUGIN_DIR/bin/helm-map"
+  - os: darwin
+    arch: amd64
+    command: "$HELM_PLUGIN_DIR/bin/helm-map"

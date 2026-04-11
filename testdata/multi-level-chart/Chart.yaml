@@ -1,0 +1,17 @@
+apiVersion: v2
+name: multi-level-chart
+version: 1.0.0
+description: A multi-level test chart for helm-map
+dependencies:
+  - name: backend
+    version: "2.0.0"
+    repository: "https://example.com/charts"
+  - name: frontend
+    version: "1.5.0"
+    repository: "https://example.com/charts"
+  - name: redis
+    version: ">=17.0.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+    tags:
+      - cache

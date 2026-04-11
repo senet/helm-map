@@ -1,0 +1,4 @@
+apiVersion: v2
+name: no-deps-chart
+version: 0.5.0
+description: A chart with no dependencies

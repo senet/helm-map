@@ -1,0 +1,28 @@
+# Binaries
+bin/
+*.exe
+
+# Go build artifacts
+*.o
+*.a
+*.so
+
+# Test
+coverage.out
+*.test
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Goreleaser
+dist/
+
+# Dependencies (vendored deps if ever added)
+vendor/

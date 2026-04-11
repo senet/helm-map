@@ -1,0 +1,3 @@
+name: legacy-chart
+version: 0.9.0
+description: A legacy Helm v2 chart using requirements.yaml
