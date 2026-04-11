@@ -2,6 +2,12 @@
 
 A Helm plugin that visualises chart dependency trees and release resource maps.
 
+## Architecture
+
+![helm-map plugin architecture](helm_map_plugin_architecture.svg)
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for full design details.
+
 ## Features
 
 - **Chart dependency graph** — recursively resolve and display chart dependencies from `Chart.yaml` / `Chart.lock`

@@ -131,6 +131,8 @@ The closest related projects:
 └────────────────┘  └────────────────┘  └────────────────┘
 ```
 
+![helm-map plugin architecture](helm_map_plugin_architecture.svg)
+
 ---
 
 ## Plugin Entry Points
