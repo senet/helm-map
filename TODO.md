@@ -98,6 +98,21 @@
 - [x] Write `README.md` with install instructions, usage examples
 - [x] Add GitHub Actions release workflow with GPG signing (goreleaser + `.prov` files)
 
+### Repo Fortification (Public Release)
+
+- [x] Simplify `install.sh` — remove auth/private-repo code, direct URL download + SHA-256 checksum + source fallback
+- [x] Pin all GitHub Actions to commit SHAs (supply-chain security)
+- [x] Add `.github/CODEOWNERS` — all files require owner review
+- [x] Add `.github/SECURITY.md` — responsible vulnerability disclosure policy
+- [x] Add `.github/dependabot.yml` — weekly Go modules + GitHub Actions updates
+- [x] Add PR template + issue templates (bug report, feature request)
+- [x] Update `README.md` — CI/Release/License/Go Report badges, simplified install instructions
+- [x] Update `CONTRIBUTING.md` — branch protection notes, CODEOWNERS reference, security guidance
+- [x] Create `main` branch ruleset — require PR + 1 approval + CODEOWNERS review + CI checks (lint/test/build) + linear history + block force push/delete
+- [x] Create `v*` tag protection ruleset — block deletion + force push
+- [x] Make repo public
+- [x] Re-release v0.1.0 with all hardened changes
+
 ---
 
 ## Phase 2 — Release & Live Resource Mapping
