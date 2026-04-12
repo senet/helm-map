@@ -24,58 +24,47 @@ esac
 DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/v${PLUGIN_VERSION}/${PROJECT_NAME}_${OS}_${ARCH}.tar.gz"
 CHECKSUM_URL="https://github.com/${GITHUB_REPO}/releases/download/v${PLUGIN_VERSION}/checksums.txt"
 
-# Build auth header for private repos. Checks GITHUB_TOKEN, GH_TOKEN, or gh CLI.
-AUTH_HEADER=""
-if [ -n "${GITHUB_TOKEN:-}" ]; then
-  AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
-elif [ -n "${GH_TOKEN:-}" ]; then
-  AUTH_HEADER="Authorization: token ${GH_TOKEN}"
-elif command -v gh >/dev/null 2>&1; then
-  GH_AUTH_TOKEN="$(gh auth token 2>/dev/null || true)"
-  if [ -n "${GH_AUTH_TOKEN:-}" ]; then
-    AUTH_HEADER="Authorization: token ${GH_AUTH_TOKEN}"
-  fi
-fi
-
 echo "Installing helm-map v${PLUGIN_VERSION} for ${OS}/${ARCH}..."
 
 install_from_release() {
   TMPDIR="$(mktemp -d)"
   trap 'rm -rf "$TMPDIR"' EXIT
 
-  CURL_ARGS=(-sSL)
-  if [ -n "$AUTH_HEADER" ]; then
-    CURL_ARGS+=(-H "$AUTH_HEADER")
-  fi
+  ARCHIVE_NAME="${PROJECT_NAME}_${OS}_${ARCH}.tar.gz"
 
-  # Download the binary archive.
-  HTTP_CODE="$(curl "${CURL_ARGS[@]}" -w '%{http_code}' "$DOWNLOAD_URL" -o "${TMPDIR}/${PROJECT_NAME}.tar.gz")"
+  echo "Downloading pre-built binary..."
+  HTTP_CODE="$(curl -sSL -w '%{http_code}' -o "${TMPDIR}/${ARCHIVE_NAME}" "$DOWNLOAD_URL")"
   if [ "$HTTP_CODE" != "200" ]; then
-    echo "Release download returned HTTP ${HTTP_CODE}." >&2
+    echo "Download failed (HTTP ${HTTP_CODE})." >&2
     return 1
   fi
 
-  # Download checksums.
-  curl "${CURL_ARGS[@]}" "$CHECKSUM_URL" -o "${TMPDIR}/checksums.txt" || true
-
-  # Verify checksum if available.
+  # Download checksums and verify.
+  curl -sSL -o "${TMPDIR}/checksums.txt" "$CHECKSUM_URL" 2>/dev/null || true
   if [ -f "${TMPDIR}/checksums.txt" ]; then
-    EXPECTED_HASH="$(grep "${PROJECT_NAME}_${OS}_${ARCH}.tar.gz" "${TMPDIR}/checksums.txt" | awk '{print $1}')"
+    EXPECTED_HASH="$(grep "${ARCHIVE_NAME}" "${TMPDIR}/checksums.txt" | awk '{print $1}')"
     if [ -n "$EXPECTED_HASH" ]; then
-      ACTUAL_HASH="$(sha256sum "${TMPDIR}/${PROJECT_NAME}.tar.gz" | awk '{print $1}')"
-      if [ "$EXPECTED_HASH" != "$ACTUAL_HASH" ]; then
+      if command -v sha256sum >/dev/null 2>&1; then
+        ACTUAL_HASH="$(sha256sum "${TMPDIR}/${ARCHIVE_NAME}" | awk '{print $1}')"
+      elif command -v shasum >/dev/null 2>&1; then
+        ACTUAL_HASH="$(shasum -a 256 "${TMPDIR}/${ARCHIVE_NAME}" | awk '{print $1}')"
+      else
+        echo "Warning: no sha256sum or shasum found, skipping checksum verification." >&2
+        ACTUAL_HASH=""
+      fi
+      if [ -n "$ACTUAL_HASH" ] && [ "$EXPECTED_HASH" != "$ACTUAL_HASH" ]; then
         echo "Checksum verification failed!" >&2
         echo "  Expected: $EXPECTED_HASH" >&2
         echo "  Actual:   $ACTUAL_HASH" >&2
         exit 1
       fi
-      echo "Checksum verified."
+      [ -n "$ACTUAL_HASH" ] && echo "Checksum verified."
     fi
   fi
 
   # Extract and install.
   mkdir -p "${HELM_PLUGIN_DIR}/bin"
-  tar -xzf "${TMPDIR}/${PROJECT_NAME}.tar.gz" -C "${HELM_PLUGIN_DIR}/bin"
+  tar -xzf "${TMPDIR}/${ARCHIVE_NAME}" -C "${HELM_PLUGIN_DIR}/bin"
   chmod +x "${HELM_PLUGIN_DIR}/bin/${PROJECT_NAME}"
 }
 
@@ -94,7 +83,7 @@ build_from_source() {
 }
 
 if ! install_from_release; then
-  echo "No pre-built release found, falling back to source build..."
+  echo "Pre-built binary not available, falling back to source build..."
   build_from_source
 fi
 

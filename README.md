@@ -1,5 +1,10 @@
 # helm-map
 
+[![CI](https://github.com/senet/helm-map/actions/workflows/ci.yml/badge.svg)](https://github.com/senet/helm-map/actions/workflows/ci.yml)
+[![Release](https://github.com/senet/helm-map/actions/workflows/release.yml/badge.svg)](https://github.com/senet/helm-map/actions/workflows/release.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/senet/helm-map)](https://goreportcard.com/report/github.com/senet/helm-map)
+[![License](https://img.shields.io/github/license/senet/helm-map)](LICENSE)
+
 A Helm plugin that visualises chart dependency trees and release resource maps.
 
 ## Architecture
@@ -18,22 +23,12 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full design details.
 
 ## Installation
 
-### Helm v3
-
 ```bash
 helm plugin install https://github.com/senet/helm-map
 ```
 
-### Helm v4
-
-```bash
-helm plugin install --verify=false https://github.com/senet/helm-map
-```
-
-> **Note:** Helm v4 enforces plugin signature verification by default. Once a signed
-> release is published (with `.prov` files), `--verify=false` will no longer be needed.
-> To verify manually, import the [public key](helm-map.pub) and check the `.prov` files
-> attached to each GitHub Release.
+Pre-built binaries are downloaded automatically for Linux, macOS, and Windows (amd64/arm64).
+If no binary is available for your platform, the installer falls back to building from source (requires Go 1.22+).
 
 ### Build from source
 
@@ -49,7 +44,7 @@ make install-local
 | Helm Version | Status | Notes |
 |---|---|---|
 | v3.18+ | Tested | Full support |
-| v4.1+ | Tested | Requires `--verify=false` until signed releases are published |
+| v4.1+ | Tested | Full support |
 
 ## Usage
 
@@ -139,17 +134,22 @@ make cover
 
 ## Release Signing
 
-Releases are signed with GPG. Each `.tar.gz` archive has a corresponding `.prov` signature file.
+All release archives are signed with GPG. Each `.tar.gz` has a corresponding `.prov` signature file and SHA-256 checksums are verified automatically by the install script.
 
 To verify a release manually:
 
 ```bash
-# Import the public key
 gpg --import helm-map.pub
-
-# Verify an archive
 gpg --verify helm-map_linux_amd64.tar.gz.prov helm-map_linux_amd64.tar.gz
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## Security
+
+To report a vulnerability, see [SECURITY.md](.github/SECURITY.md).
 
 ## License
 
