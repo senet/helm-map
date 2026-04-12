@@ -26,29 +26,57 @@ CHECKSUM_URL="https://github.com/${GITHUB_REPO}/releases/download/v${PLUGIN_VERS
 
 echo "Installing helm-map v${PLUGIN_VERSION} for ${OS}/${ARCH}..."
 
-TMPDIR="$(mktemp -d)"
-trap 'rm -rf "$TMPDIR"' EXIT
+install_from_release() {
+  TMPDIR="$(mktemp -d)"
+  trap 'rm -rf "$TMPDIR"' EXIT
 
-# Download the binary archive and checksums.
-curl -sSL "$DOWNLOAD_URL" -o "${TMPDIR}/${PROJECT_NAME}.tar.gz"
-curl -sSL "$CHECKSUM_URL" -o "${TMPDIR}/checksums.txt"
+  # Download the binary archive and checksums.
+  HTTP_CODE="$(curl -sSL -w '%{http_code}' "$DOWNLOAD_URL" -o "${TMPDIR}/${PROJECT_NAME}.tar.gz")"
+  if [ "$HTTP_CODE" != "200" ]; then
+    echo "Release download returned HTTP ${HTTP_CODE}." >&2
+    return 1
+  fi
 
-# Verify checksum.
-EXPECTED_HASH="$(grep "${PROJECT_NAME}_${OS}_${ARCH}.tar.gz" "${TMPDIR}/checksums.txt" | awk '{print $1}')"
-if [ -n "$EXPECTED_HASH" ]; then
-  ACTUAL_HASH="$(sha256sum "${TMPDIR}/${PROJECT_NAME}.tar.gz" | awk '{print $1}')"
-  if [ "$EXPECTED_HASH" != "$ACTUAL_HASH" ]; then
-    echo "Checksum verification failed!" >&2
-    echo "  Expected: $EXPECTED_HASH" >&2
-    echo "  Actual:   $ACTUAL_HASH" >&2
+  curl -sSL "$CHECKSUM_URL" -o "${TMPDIR}/checksums.txt" || true
+
+  # Verify checksum if available.
+  if [ -f "${TMPDIR}/checksums.txt" ]; then
+    EXPECTED_HASH="$(grep "${PROJECT_NAME}_${OS}_${ARCH}.tar.gz" "${TMPDIR}/checksums.txt" | awk '{print $1}')"
+    if [ -n "$EXPECTED_HASH" ]; then
+      ACTUAL_HASH="$(sha256sum "${TMPDIR}/${PROJECT_NAME}.tar.gz" | awk '{print $1}')"
+      if [ "$EXPECTED_HASH" != "$ACTUAL_HASH" ]; then
+        echo "Checksum verification failed!" >&2
+        echo "  Expected: $EXPECTED_HASH" >&2
+        echo "  Actual:   $ACTUAL_HASH" >&2
+        exit 1
+      fi
+      echo "Checksum verified."
+    fi
+  fi
+
+  # Extract and install.
+  mkdir -p "${HELM_PLUGIN_DIR}/bin"
+  tar -xzf "${TMPDIR}/${PROJECT_NAME}.tar.gz" -C "${HELM_PLUGIN_DIR}/bin"
+  chmod +x "${HELM_PLUGIN_DIR}/bin/${PROJECT_NAME}"
+}
+
+build_from_source() {
+  echo "Building from source..."
+  if ! command -v go >/dev/null 2>&1; then
+    echo "Error: Go is required to build from source. Install Go >= 1.22 and retry." >&2
     exit 1
   fi
-  echo "Checksum verified."
-fi
+  mkdir -p "${HELM_PLUGIN_DIR}/bin"
+  cd "${HELM_PLUGIN_DIR}"
+  go build -o "${HELM_PLUGIN_DIR}/bin/${PROJECT_NAME}" \
+    -ldflags "-X main.version=${PLUGIN_VERSION}" \
+    ./cmd/helm-map/
+  echo "Built from source successfully."
+}
 
-# Extract and install.
-mkdir -p "${HELM_PLUGIN_DIR}/bin"
-tar -xzf "${TMPDIR}/${PROJECT_NAME}.tar.gz" -C "${HELM_PLUGIN_DIR}/bin"
-chmod +x "${HELM_PLUGIN_DIR}/bin/${PROJECT_NAME}"
+if ! install_from_release; then
+  echo "No pre-built release found, falling back to source build..."
+  build_from_source
+fi
 
 echo "helm-map v${PLUGIN_VERSION} installed successfully."
