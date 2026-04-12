@@ -21,81 +21,82 @@
 
 ### Project scaffolding
 
-- [ ] Initialise Go module (`go mod init github.com/your-org/helm-map`)
-- [ ] Set up `cmd/helm-map/main.go` with Cobra root command
-- [ ] Add sub-commands: `chart`, `deps`, `release`, `live`, `push`, `version`
-- [ ] Wire `--output`, `--depth`, `--with-images`, `--dry-run`, `--namespace`, `--kubeconfig`, `--kube-context` global flags
-- [ ] Bind flags to environment variables via Viper (`HELM_MAP_*` prefix)
-- [ ] Read config from `$HELM_DATA_HOME/helm-map/config.yaml` with Viper
-- [ ] Set up `Makefile` targets: `build`, `test`, `lint`, `release`, `install-local`
-- [ ] Set up `goreleaser` for cross-platform builds (linux/amd64, darwin/amd64, darwin/arm64, windows/amd64)
+- [x] Initialise Go module (`go mod init github.com/senet/helm-map`)
+- [x] Set up `cmd/helm-map/main.go` with Cobra root command
+- [x] Add sub-commands: `chart`, `deps`, `release`, `live`, `push`, `version`
+- [x] Wire `--output`, `--depth`, `--with-images`, `--dry-run`, `--namespace`, `--kubeconfig`, `--kube-context` global flags
+- [x] Bind flags to environment variables via Viper (`HELM_MAP_*` prefix)
+- [x] Read config from `$HELM_DATA_HOME/helm-map/config.yaml` with Viper
+- [x] Set up `Makefile` targets: `build`, `test`, `lint`, `release`, `install-local`
+- [x] Set up `goreleaser` for cross-platform builds (linux/amd64, darwin/amd64, darwin/arm64, windows/amd64)
 
 ### Plugin manifest & install
 
-- [ ] Write `plugin.yaml` with correct `command`, `hooks`, `platformCommand` entries
-- [ ] Write `scripts/install.sh` — downloads correct binary for OS/arch, verifies SHA256
-- [ ] Write `scripts/verify.sh` — standalone checksum verification helper
-- [ ] Publish SHA256 checksums alongside GitHub Release assets
-- [ ] Test `helm plugin install` end-to-end on linux/amd64
+- [x] Write `plugin.yaml` with `hooks`, `platformCommand` entries
+- [x] Write `scripts/install.sh` — downloads binary or builds from source, verifies SHA256
+- [x] Write `scripts/verify.sh` — standalone checksum verification helper
+- [x] Publish SHA256 checksums alongside GitHub Release assets (via goreleaser)
+- [x] Test `helm plugin install` end-to-end on linux/amd64 (Helm v3 + v4)
 - [ ] Test `helm plugin install` end-to-end on darwin/arm64
 - [ ] Test `helm plugin install` end-to-end on windows/amd64
-- [ ] Verify `helm map --help` and `helm map version` work after install
+- [x] Verify `helm map --help` and `helm map version` work after install
 
 ### Dependency Resolver (`internal/engine/resolver`)
 
-- [ ] Parse `Chart.yaml` dependencies block (Helm v3/v4 format)
-- [ ] Parse `requirements.yaml` for legacy Helm v2 charts (read-only support)
-- [ ] Read pinned versions from `Chart.lock`
+- [x] Parse `Chart.yaml` dependencies block (Helm v3/v4 format)
+- [x] Parse `requirements.yaml` for legacy Helm v2 charts (read-only support)
+- [x] Read pinned versions from `Chart.lock`
 - [ ] Resolve version constraints against repository index (`index.yaml`) when no lock file
-- [ ] Resolve `repository: "file://..."` local chart dependencies
+- [x] Resolve `repository: "file://..."` local chart dependencies
 - [ ] Resolve `repository: "oci://..."` dependencies (OCI tag listing)
-- [ ] Handle `condition` field on dependencies (mark edge as optional + store condition string)
-- [ ] Handle `tags` field on dependencies
-- [ ] Implement `--depth` flag limiting for recursive resolution
-- [ ] Write unit tests covering: flat deps, nested deps, conditional deps, file:// deps, OCI deps, missing lock file, missing repo
-- [ ] Write integration test with a real multi-level chart fixture
+- [x] Handle `condition` field on dependencies (mark edge as optional + store condition string)
+- [x] Handle `tags` field on dependencies
+- [x] Implement `--depth` flag limiting for recursive resolution
+- [x] Write unit tests covering: flat deps, nested deps, conditional deps, file:// deps, missing lock file, missing repo (9 tests)
+- [x] Write integration test with a real multi-level chart fixture (testdata/multi-level-chart)
 
 ### Graph Builder (`internal/engine/graph`)
 
-- [ ] Define `Node`, `Edge`, `Graph`, `GraphMeta` types
-- [ ] Implement stable node ID generation (`chart:name:version`, etc.)
-- [ ] Implement `Build()` from `[]ResolvedDep` (chart-only path, Phase 1)
-- [ ] Implement `Roots()` — nodes with no incoming DependsOn edges
-- [ ] Implement `Children(id)` — direct children of a node
-- [ ] Implement `MaxDepth()` — longest path in the DAG
-- [ ] Implement `TopoSort()` using Kahn's algorithm (stable, deterministic order)
-- [ ] Write unit tests for graph construction, root detection, cycle detection
+- [x] Define `Node`, `Edge`, `Graph`, `GraphMeta` types
+- [x] Implement stable node ID generation (`chart:name:version`, etc.)
+- [x] Implement `Build()` from `[]ResolvedDep` (chart-only path, Phase 1)
+- [x] Implement `Roots()` — nodes with no incoming DependsOn edges
+- [x] Implement `Children(id)` — direct children of a node
+- [x] Implement `MaxDepth()` — longest path in the DAG
+- [x] Implement `TopoSort()` using Kahn's algorithm (stable, deterministic order)
+- [x] Write unit tests for graph construction, root detection, cycle detection (12 tests)
 
 ### Terminal Renderer (`internal/renderer/terminal.go`)
 
-- [ ] Implement ANSI tree rendering with `charmbracelet/lipgloss`
-- [ ] Colour scheme: Chart=cyan, Release=green, K8sResource=yellow, Image=magenta
-- [ ] Show optional/conditional deps as dimmed with `[condition]` annotation
-- [ ] Show `[tags: x, y]` annotation for tagged deps
-- [ ] Detect non-TTY (piped output) and emit plain-text tree without ANSI codes
-- [ ] Write unit tests for tree output (snapshot testing)
+- [x] Implement ANSI tree rendering (custom implementation using golang.org/x/term)
+- [x] Colour scheme: Chart=cyan, Release=green, K8sResource=yellow, Image=magenta
+- [x] Show optional/conditional deps as dimmed with `[condition]` annotation
+- [x] Show `[tags: x, y]` annotation for tagged deps
+- [x] Detect non-TTY (piped output) and emit plain-text tree without ANSI codes
+- [x] Write unit tests for tree output (5 tests)
 
 ### `helm map chart` command
 
-- [ ] Accept local path (`./my-chart`) or `repo/name:version` reference
-- [ ] Fetch remote chart tarball if reference is not a local path
-- [ ] Wire to `resolver.Resolve` + `graph.Build` + `renderer.New(terminal)`
-- [ ] Write integration tests using a fixture chart with nested deps
+- [x] Accept local path (`./my-chart`)
+- [ ] Fetch remote chart tarball if reference is `repo/name:version`
+- [x] Wire to `resolver.Resolve` + `graph.Build` + `renderer.New(terminal)`
+- [x] Write integration tests using fixture charts (6 testdata directories)
 
 ### `helm map deps` command
 
-- [ ] Flat list output: `name | version | repository | condition | tags`
-- [ ] Honour `--depth` flag
-- [ ] Machine-readable: `--output json` emits a JSON array of dep objects
+- [x] Flat list output: `name | version | repository | condition | tags`
+- [x] Honour `--depth` flag
+- [x] Machine-readable: `--output json` emits a JSON array of dep objects
 
 ### CI / Quality
 
-- [ ] Add GitHub Actions workflow: lint (`golangci-lint`), test (`go test ./...`), build
-- [ ] Enforce `go vet`, `staticcheck`, `errcheck` in CI
-- [ ] Add test coverage reporting (target: >80% on `internal/engine/`)
-- [ ] Add `CONTRIBUTING.md`
-- [ ] Add `LICENSE` (Apache 2.0)
-- [ ] Write `README.md` with install instructions, usage examples, output screenshots
+- [x] Add GitHub Actions workflow: lint (`golangci-lint`), test (`go test ./...`), build
+- [x] Enforce `go vet` in CI
+- [x] Add test coverage reporting (target: >80% on `internal/engine/`)
+- [x] Add `CONTRIBUTING.md`
+- [x] Add `LICENSE` (Apache 2.0)
+- [x] Write `README.md` with install instructions, usage examples
+- [x] Add GitHub Actions release workflow with GPG signing (goreleaser + `.prov` files)
 
 ---
 
@@ -138,11 +139,11 @@
 
 ### JSON Renderer (`internal/renderer/json.go`)
 
-- [ ] Implement JSON rendering matching the `helm-map.com` schema v1
-- [ ] Include all `Node` and `Edge` fields
-- [ ] Include `meta` block (generatedAt, helmVersion, pluginVersion, kubeContext)
+- [x] Implement JSON rendering matching the `helm-map.com` schema v1
+- [x] Include all `Node` and `Edge` fields
+- [x] Include `meta` block (generatedAt, pluginVersion)
 - [ ] Validate output against the JSON Schema before writing (`pkg/schema/v1`)
-- [ ] Write unit tests (snapshot + schema validation)
+- [x] Write unit tests (JSON validity test in renderer_test.go)
 
 ### `helm map push` command
 
@@ -183,11 +184,11 @@
 
 ### OCI distribution
 
-- [ ] Publish Go binary as tarball to GitHub Releases via goreleaser
-- [ ] Publish SHA256 `checksums.txt` alongside release assets
+- [x] Publish Go binary as tarball to GitHub Releases via goreleaser
+- [x] Publish SHA256 `checksums.txt` alongside release assets
 - [ ] Publish OCI artifact of the binary (for Helm v4 OCI-install path) via `oras push`
-- [ ] Set up GitHub Actions release workflow triggered on `git tag v*`
-- [ ] Sign GitHub Release assets with GitHub artifact attestation
+- [x] Set up GitHub Actions release workflow triggered on `git tag v*`
+- [x] Sign GitHub Release assets with GPG (`.prov` files via goreleaser)
 - [ ] Test OCI install from `ghcr.io` registry
 
 ### Documentation

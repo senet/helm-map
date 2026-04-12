@@ -18,11 +18,24 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full design details.
 
 ## Installation
 
+### Helm v3
+
 ```bash
 helm plugin install https://github.com/senet/helm-map
 ```
 
-Or build from source:
+### Helm v4
+
+```bash
+helm plugin install --verify=false https://github.com/senet/helm-map
+```
+
+> **Note:** Helm v4 enforces plugin signature verification by default. Once a signed
+> release is published (with `.prov` files), `--verify=false` will no longer be needed.
+> To verify manually, import the [public key](helm-map.pub) and check the `.prov` files
+> attached to each GitHub Release.
+
+### Build from source
 
 ```bash
 git clone https://github.com/senet/helm-map.git
@@ -30,6 +43,13 @@ cd helm-map
 make build
 make install-local
 ```
+
+## Compatibility
+
+| Helm Version | Status | Notes |
+|---|---|---|
+| v3.18+ | Tested | Full support |
+| v4.1+ | Tested | Requires `--verify=false` until signed releases are published |
 
 ## Usage
 
@@ -115,6 +135,20 @@ make lint
 
 # Coverage report
 make cover
+```
+
+## Release Signing
+
+Releases are signed with GPG. Each `.tar.gz` archive has a corresponding `.prov` signature file.
+
+To verify a release manually:
+
+```bash
+# Import the public key
+gpg --import helm-map.pub
+
+# Verify an archive
+gpg --verify helm-map_linux_amd64.tar.gz.prov helm-map_linux_amd64.tar.gz
 ```
 
 ## License
