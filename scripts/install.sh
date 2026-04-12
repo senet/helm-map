@@ -24,20 +24,39 @@ esac
 DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/v${PLUGIN_VERSION}/${PROJECT_NAME}_${OS}_${ARCH}.tar.gz"
 CHECKSUM_URL="https://github.com/${GITHUB_REPO}/releases/download/v${PLUGIN_VERSION}/checksums.txt"
 
+# Build auth header for private repos. Checks GITHUB_TOKEN, GH_TOKEN, or gh CLI.
+AUTH_HEADER=""
+if [ -n "${GITHUB_TOKEN:-}" ]; then
+  AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+elif [ -n "${GH_TOKEN:-}" ]; then
+  AUTH_HEADER="Authorization: token ${GH_TOKEN}"
+elif command -v gh >/dev/null 2>&1; then
+  GH_AUTH_TOKEN="$(gh auth token 2>/dev/null || true)"
+  if [ -n "${GH_AUTH_TOKEN:-}" ]; then
+    AUTH_HEADER="Authorization: token ${GH_AUTH_TOKEN}"
+  fi
+fi
+
 echo "Installing helm-map v${PLUGIN_VERSION} for ${OS}/${ARCH}..."
 
 install_from_release() {
   TMPDIR="$(mktemp -d)"
   trap 'rm -rf "$TMPDIR"' EXIT
 
-  # Download the binary archive and checksums.
-  HTTP_CODE="$(curl -sSL -w '%{http_code}' "$DOWNLOAD_URL" -o "${TMPDIR}/${PROJECT_NAME}.tar.gz")"
+  CURL_ARGS=(-sSL)
+  if [ -n "$AUTH_HEADER" ]; then
+    CURL_ARGS+=(-H "$AUTH_HEADER")
+  fi
+
+  # Download the binary archive.
+  HTTP_CODE="$(curl "${CURL_ARGS[@]}" -w '%{http_code}' "$DOWNLOAD_URL" -o "${TMPDIR}/${PROJECT_NAME}.tar.gz")"
   if [ "$HTTP_CODE" != "200" ]; then
     echo "Release download returned HTTP ${HTTP_CODE}." >&2
     return 1
   fi
 
-  curl -sSL "$CHECKSUM_URL" -o "${TMPDIR}/checksums.txt" || true
+  # Download checksums.
+  curl "${CURL_ARGS[@]}" "$CHECKSUM_URL" -o "${TMPDIR}/checksums.txt" || true
 
   # Verify checksum if available.
   if [ -f "${TMPDIR}/checksums.txt" ]; then
