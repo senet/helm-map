@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PLUGIN_VERSION="0.1.0"
+PLUGIN_VERSION="0.1.1"
 PROJECT_NAME="helm-map"
 GITHUB_REPO="senet/helm-map"
 
