@@ -5,8 +5,8 @@ description: |-
   helm-map generates dependency graphs for charts and resource maps
   for live releases. Output formats: terminal tree, DOT, SVG, JSON.
 hooks:
-  install: "scripts/install.sh"
-  update: "scripts/install.sh"
+  install: "${HELM_PLUGIN_DIR}/scripts/install.sh"
+  update: "${HELM_PLUGIN_DIR}/scripts/install.sh"
 ignoreFlags: false
 platformCommand:
   - os: windows

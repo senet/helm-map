@@ -46,3 +46,58 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+
+      - name: Package and sign plugin tarball for Helm v4
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          # Create plugin tarball containing plugin source files.
+          # The inner directory is "map" (matching plugin.yaml name field).
+          STAGE="$(mktemp -d)"
+          mkdir -p "$STAGE/map/scripts"
+          cp plugin.yaml   "$STAGE/map/"
+          cp LICENSE        "$STAGE/map/"
+          cp helm-map.pub  "$STAGE/map/"
+          cp scripts/install.sh "$STAGE/map/scripts/"
+          tar czf helm-map.tgz -C "$STAGE" map
+          rm -rf "$STAGE"
+
+          # Compute SHA-256 of the tarball.
+          HASH="$(sha256sum helm-map.tgz | awk '{print $1}')"
+
+          # Build the Helm provenance message body (metadata + checksums).
+          # Format: <metadata yaml>\n...\n<files yaml>
+          # The metadata section is informational; only the files section is
+          # used during verification.
+          cat > prov-body.yaml <<PROVEOF
+          name: map
+          version: "${VERSION}"
+          ...
+          files:
+            helm-map.tgz: "sha256:${HASH}"
+          PROVEOF
+          # Strip leading spaces (heredoc indentation).
+          sed -i 's/^          //' prov-body.yaml
+
+          # GPG clearsign the provenance body (SHA-512, matching Helm's default).
+          gpg --batch --yes \
+            --local-user "$GPG_FINGERPRINT" \
+            --clearsign --digest-algo SHA512 \
+            --output helm-map.tgz.prov \
+            prov-body.yaml
+          rm prov-body.yaml
+
+          # Export public key in binary OpenPGP format for direct --keyring use.
+          gpg --export "$GPG_FINGERPRINT" > helm-map.gpg
+        env:
+          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+
+      - name: Upload plugin tarball, provenance, and keyring
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            helm-map.tgz \
+            helm-map.tgz.prov \
+            helm-map.gpg \
+            --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -23,12 +23,34 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full design details.
 
 ## Installation
 
+### Helm v3
+
 ```bash
 helm plugin install https://github.com/senet/helm-map
 ```
 
+### Helm v4 (signature-verified)
+
+Helm v4 verifies plugin signatures by default. Download the signing key and
+install from the release tarball:
+
+```bash
+curl -sL https://github.com/senet/helm-map/raw/main/helm-map.gpg -o /tmp/helm-map.gpg
+helm plugin install --keyring /tmp/helm-map.gpg \
+  https://github.com/senet/helm-map/releases/latest/download/helm-map.tgz
+```
+
+Or import the key into your GPG keyring for automatic verification:
+
+```bash
+curl -sL https://github.com/senet/helm-map/raw/main/helm-map.pub | gpg --import
+gpg --export > ~/.gnupg/pubring.gpg
+helm plugin install https://github.com/senet/helm-map/releases/latest/download/helm-map.tgz
+```
+
 Pre-built binaries are downloaded automatically for Linux, macOS, and Windows (amd64/arm64).
-If no binary is available for your platform, the installer falls back to building from source (requires Go 1.22+).
+SHA-256 checksums are verified on every install. If no binary is available for your platform,
+the installer falls back to building from source (requires Go 1.22+).
 
 ### Build from source
 
@@ -43,8 +65,8 @@ make install-local
 
 | Helm Version | Status | Notes |
 |---|---|---|
-| v3.18+ | Tested | Full support |
-| v4.1+ | Tested | Full support |
+| v3.18+ | Tested | Full support (VCS install) |
+| v4.1+ | Tested | Full support (signed tarball install) |
 
 ## Usage
 
@@ -135,6 +157,8 @@ make cover
 ## Release Signing
 
 All release archives are signed with GPG. Each `.tar.gz` has a corresponding `.prov` signature file and SHA-256 checksums are verified automatically by the install script.
+
+A signed plugin tarball (`helm-map.tgz` + `helm-map.tgz.prov`) is published with every release for Helm v4 signature verification. The binary keyring file (`helm-map.gpg`) can be used directly with `--keyring`.
 
 To verify a release manually:
 
