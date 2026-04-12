@@ -33,6 +33,19 @@ checksum:
   name_template: "checksums.txt"
   algorithm: sha256
 
+signs:
+  - artifacts: archive
+    cmd: gpg2
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+    signature: "${artifact}.prov"
+
 release:
   github:
     owner: senet
