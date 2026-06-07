@@ -190,10 +190,10 @@ func flattenDeps(deps []resolver.ResolvedDep) []flatDep {
 
 func newReleaseCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "release <release-name>",
+		Use:         "release <release-name>",
 		Annotations: map[string]string{"phase": "2"},
-		Short: "Resource map of a live release (Phase 2)",
-		Args:  cobra.ExactArgs(1),
+		Short:       "Resource map of a live release (Phase 2)",
+		Args:        cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("'helm map release' is not yet implemented — coming in Phase 2")
 		},
@@ -204,9 +204,9 @@ func newReleaseCmd() *cobra.Command {
 
 func newLiveCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "live",
+		Use:         "live",
 		Annotations: map[string]string{"phase": "2"},
-		Short: "Map of all releases in a namespace (Phase 2)",
+		Short:       "Map of all releases in a namespace (Phase 2)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("'helm map live' is not yet implemented — coming in Phase 2")
 		},
@@ -217,9 +217,9 @@ func newLiveCmd() *cobra.Command {
 
 func newPushCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "push",
+		Use:         "push",
 		Annotations: map[string]string{"phase": "2"},
-		Short: "Push JSON graph to helm-map.com API (Phase 2)",
+		Short:       "Push JSON graph to helm-map.com API (Phase 2)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("'helm map push' is not yet implemented — coming in Phase 2")
 		},

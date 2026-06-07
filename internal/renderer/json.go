@@ -10,10 +10,10 @@ import (
 type JSONRenderer struct{}
 
 type jsonOutput struct {
-	Version string       `json:"version"`
+	Version string          `json:"version"`
 	Meta    graph.GraphMeta `json:"meta"`
-	Nodes   []graph.Node `json:"nodes"`
-	Edges   []graph.Edge `json:"edges"`
+	Nodes   []graph.Node    `json:"nodes"`
+	Edges   []graph.Edge    `json:"edges"`
 }
 
 // Render produces JSON output matching the helm-map.com schema v1.

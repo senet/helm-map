@@ -11,12 +11,12 @@ import (
 
 // Config holds the merged configuration from flags, env vars, and config file.
 type Config struct {
-	Output     string `mapstructure:"output"`
-	Depth      int    `mapstructure:"depth"`
-	WithImages bool   `mapstructure:"withImages"`
-	DryRun     bool   `mapstructure:"dryRun"`
-	Namespace  string `mapstructure:"namespace"`
-	Kubeconfig string `mapstructure:"kubeconfig"`
+	Output      string `mapstructure:"output"`
+	Depth       int    `mapstructure:"depth"`
+	WithImages  bool   `mapstructure:"withImages"`
+	DryRun      bool   `mapstructure:"dryRun"`
+	Namespace   string `mapstructure:"namespace"`
+	Kubeconfig  string `mapstructure:"kubeconfig"`
 	KubeContext string `mapstructure:"kubeContext"`
 }
 

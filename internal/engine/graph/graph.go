@@ -63,10 +63,10 @@ type Graph struct {
 	Meta  GraphMeta `json:"meta"`
 
 	// Internal indexes built lazily.
-	nodeIndex    map[string]*Node
-	childIndex   map[string][]string
-	parentIndex  map[string][]string
-	indexed      bool
+	nodeIndex   map[string]*Node
+	childIndex  map[string][]string
+	parentIndex map[string][]string
+	indexed     bool
 }
 
 // NodeByID returns the node with the given ID, or nil if not found.
