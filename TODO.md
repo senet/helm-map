@@ -29,6 +29,7 @@
 - [x] Read config from `$HELM_DATA_HOME/helm-map/config.yaml` with Viper
 - [x] Set up `Makefile` targets: `build`, `test`, `lint`, `release`, `install-local`
 - [x] Set up `goreleaser` for cross-platform builds (linux/amd64, darwin/amd64, darwin/arm64, windows/amd64)
+- [ ] Add `.pre-commit-config.yaml` for pre-commit validation (fmt, lint, test, security)
 
 ### Plugin manifest & install
 
@@ -49,6 +50,7 @@
 - [ ] Resolve version constraints against repository index (`index.yaml`) when no lock file
 - [x] Resolve `repository: "file://..."` local chart dependencies
 - [ ] Resolve `repository: "oci://..."` dependencies (OCI tag listing)
+- [ ] Implement remote chart downloading logic (fetch via `helm pull` or SDK into temp dir if argument is remote `repo/name:version`)
 - [x] Handle `condition` field on dependencies (mark edge as optional + store condition string)
 - [x] Handle `tags` field on dependencies
 - [x] Implement `--depth` flag limiting for recursive resolution
