@@ -1,5 +1,5 @@
 name: "map"
-version: "0.1.1"
+version: "0.1.2"
 usage: "Visualize Helm chart dependency and release resource maps"
 description: |-
   helm-map generates dependency graphs for charts and resource maps
