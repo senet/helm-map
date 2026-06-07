@@ -134,7 +134,7 @@ func resolveAt(chartPath string, maxDepth, currentDepth int) ([]ResolvedDep, *Ch
 
 		// Recurse into children if depth allows.
 		if maxDepth == 0 || currentDepth+1 < maxDepth {
-			childPath := findChildChartPath(chartPath, dep)
+			childPath := findChildChartPath(chartPath, dep, rd.Version)
 			if childPath != "" {
 				children, _, err := resolveAt(childPath, maxDepth, currentDepth+1)
 				if err == nil {
@@ -206,7 +206,7 @@ func resolveVersion(dep Dependency, lockMap map[string]LockDep) string {
 	return dep.Version
 }
 
-func findChildChartPath(parentPath string, dep Dependency) string {
+func findChildChartPath(parentPath string, dep Dependency, lockedVersion string) string {
 	// Check for file:// local dependency.
 	if len(dep.Repository) > 7 && dep.Repository[:7] == "file://" {
 		rel := dep.Repository[7:]
@@ -220,6 +220,36 @@ func findChildChartPath(parentPath string, dep Dependency) string {
 	subPath := filepath.Join(parentPath, "charts", dep.Name)
 	if info, err := os.Stat(subPath); err == nil && info.IsDir() {
 		return subPath
+	}
+
+	// For remote repositories (oci:// or http(s)://), attempt to pull the chart to a temp directory
+	if dep.Repository != "" && !strings.HasPrefix(dep.Repository, "file://") {
+		tempDir, err := os.MkdirTemp("", "helm-map-dep-*")
+		if err != nil {
+			return "" // Silently fail to resolve remote children if temp dir fails
+		}
+
+		version := lockedVersion
+		if version == "" {
+			version = dep.Version
+		}
+
+		args := []string{"pull", dep.Name, "--repo", dep.Repository, "--untar", "--untardir", tempDir}
+
+		// If it is an OCI registry, --repo is not used, the ref is the repository + name
+		if strings.HasPrefix(dep.Repository, "oci://") {
+			ref := dep.Repository + "/" + dep.Name
+			args = []string{"pull", ref, "--untar", "--untardir", tempDir}
+		}
+
+		if version != "" {
+			args = append(args, "--version", version)
+		}
+
+		cmd := exec.Command("helm", args...)
+		if err := cmd.Run(); err == nil {
+			return filepath.Join(tempDir, dep.Name)
+		}
 	}
 
 	return ""

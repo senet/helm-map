@@ -29,7 +29,7 @@
 - [x] Read config from `$HELM_DATA_HOME/helm-map/config.yaml` with Viper
 - [x] Set up `Makefile` targets: `build`, `test`, `lint`, `release`, `install-local`
 - [x] Set up `goreleaser` for cross-platform builds (linux/amd64, darwin/amd64, darwin/arm64, windows/amd64)
-- [ ] Add `.pre-commit-config.yaml` for pre-commit validation (fmt, lint, test, security)
+- [x] Add `.pre-commit-config.yaml` for pre-commit validation (fmt, lint, test, security)
 
 ### Plugin manifest & install
 
@@ -47,10 +47,10 @@
 - [x] Parse `Chart.yaml` dependencies block (Helm v3/v4 format)
 - [x] Parse `requirements.yaml` for legacy Helm v2 charts (read-only support)
 - [x] Read pinned versions from `Chart.lock`
-- [ ] Resolve version constraints against repository index (`index.yaml`) when no lock file
+- [x] Resolve version constraints against repository index (`index.yaml`) when no lock file
 - [x] Resolve `repository: "file://..."` local chart dependencies
-- [ ] Resolve `repository: "oci://..."` dependencies (OCI tag listing)
-- [ ] Implement remote chart downloading logic (fetch via `helm pull` or SDK into temp dir if argument is remote `repo/name:version`)
+- [x] Resolve `repository: "oci://..."` dependencies (OCI tag listing)
+- [x] Implement remote chart downloading logic (fetch via `helm pull` or SDK into temp dir if argument is remote `repo/name:version`)
 - [x] Handle `condition` field on dependencies (mark edge as optional + store condition string)
 - [x] Handle `tags` field on dependencies
 - [x] Implement `--depth` flag limiting for recursive resolution
@@ -80,7 +80,7 @@
 ### `helm map chart` command
 
 - [x] Accept local path (`./my-chart`)
-- [ ] Fetch remote chart tarball if reference is `repo/name:version`
+- [x] Fetch remote chart tarball if reference is `repo/name:version`
 - [x] Wire to `resolver.Resolve` + `graph.Build` + `renderer.New(terminal)`
 - [x] Write integration tests using fixture charts (6 testdata directories)
 
