@@ -68,38 +68,62 @@ func Resolve(cfg ResolveConfig) ([]ResolvedDep, *ChartMetadata, error) {
 
 	// Check if the path is a local directory
 	info, err := os.Stat(chartPath)
-	if err != nil || !info.IsDir() {
-		// It's not a local directory, attempt to pull it
-		tempDir, err := os.MkdirTemp("", "helm-map-*")
-		if err != nil {
-			return nil, nil, fmt.Errorf("creating temp dir for remote chart: %w", err)
-		}
-		defer os.RemoveAll(tempDir)
-
-		ref := chartPath
-		version := ""
-		if parts := strings.Split(ref, ":"); len(parts) == 2 {
-			ref = parts[0]
-			version = parts[1]
-		}
-
-		args := []string{"pull", ref, "--untar", "--untardir", tempDir}
-		if version != "" {
-			args = append(args, "--version", version)
-		}
-
-		cmd := exec.Command("helm", args...)
-		if output, err := cmd.CombinedOutput(); err != nil {
-			return nil, nil, fmt.Errorf("pulling remote chart %s: %w\n%s", chartPath, err, string(output))
-		}
-
-		// The untarred chart will be in tempDir/<chart-name>
-		nameParts := strings.Split(ref, "/")
-		chartName := nameParts[len(nameParts)-1]
-		chartPath = filepath.Join(tempDir, chartName)
+	if err == nil && info.IsDir() {
+		return resolveAt(chartPath, cfg.MaxDepth, 0)
 	}
 
-	return resolveAt(chartPath, cfg.MaxDepth, 0)
+	tempDir, tmpErr := os.MkdirTemp("", "helm-map-*")
+	if tmpErr != nil {
+		return nil, nil, fmt.Errorf("creating temp dir: %w", tmpErr)
+	}
+	// Note: since we might resolve recursively, we need to carefully manage the temp dir.
+	// But actually, resolveAt reads everything into memory (ResolvedDep, ChartMetadata), 
+	// so the temp dir can be cleaned up after resolveAt returns.
+	defer os.RemoveAll(tempDir)
+
+	if err == nil && !info.IsDir() {
+		// It's a local file, try to extract it
+		cmd := exec.Command("tar", "-xzf", chartPath, "-C", tempDir)
+		if output, tarErr := cmd.CombinedOutput(); tarErr != nil {
+			return nil, nil, fmt.Errorf("untarring local chart archive %s: %w\n%s", chartPath, tarErr, string(output))
+		}
+		
+		entries, dirErr := os.ReadDir(tempDir)
+		if dirErr != nil || len(entries) == 0 {
+			return nil, nil, fmt.Errorf("could not find chart directory in archive")
+		}
+		
+		for _, entry := range entries {
+			if entry.IsDir() {
+				return resolveAt(filepath.Join(tempDir, entry.Name()), cfg.MaxDepth, 0)
+			}
+		}
+		return nil, nil, fmt.Errorf("no directory found inside chart archive %s", chartPath)
+	}
+
+	// It's not a local path, attempt to pull it as a remote chart
+	ref := chartPath
+	version := ""
+	if parts := strings.Split(ref, ":"); len(parts) == 2 {
+		ref = parts[0]
+		version = parts[1]
+	}
+
+	args := []string{"pull", ref, "--untar", "--untardir", tempDir}
+	if version != "" {
+		args = append(args, "--version", version)
+	}
+
+	cmd := exec.Command("helm", args...)
+	if output, cmdErr := cmd.CombinedOutput(); cmdErr != nil {
+		return nil, nil, fmt.Errorf("pulling remote chart %s: %w\n%s", chartPath, cmdErr, string(output))
+	}
+
+	// The untarred chart will be in tempDir/<chart-name>
+	nameParts := strings.Split(ref, "/")
+	chartName := nameParts[len(nameParts)-1]
+	
+	return resolveAt(filepath.Join(tempDir, chartName), cfg.MaxDepth, 0)
 }
 
 func resolveAt(chartPath string, maxDepth, currentDepth int) ([]ResolvedDep, *ChartMetadata, error) {
