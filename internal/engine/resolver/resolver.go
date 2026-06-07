@@ -5,7 +5,9 @@ package resolver
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -60,8 +62,44 @@ type LockDep struct {
 }
 
 // Resolve recursively resolves chart dependencies starting from cfg.ChartPath.
+// If the path is not a local directory, it attempts to fetch it as a remote chart.
 func Resolve(cfg ResolveConfig) ([]ResolvedDep, *ChartMetadata, error) {
-	return resolveAt(cfg.ChartPath, cfg.MaxDepth, 0)
+	chartPath := cfg.ChartPath
+
+	// Check if the path is a local directory
+	info, err := os.Stat(chartPath)
+	if err != nil || !info.IsDir() {
+		// It's not a local directory, attempt to pull it
+		tempDir, err := os.MkdirTemp("", "helm-map-*")
+		if err != nil {
+			return nil, nil, fmt.Errorf("creating temp dir for remote chart: %w", err)
+		}
+		defer os.RemoveAll(tempDir)
+
+		ref := chartPath
+		version := ""
+		if parts := strings.Split(ref, ":"); len(parts) == 2 {
+			ref = parts[0]
+			version = parts[1]
+		}
+
+		args := []string{"pull", ref, "--untar", "--untardir", tempDir}
+		if version != "" {
+			args = append(args, "--version", version)
+		}
+
+		cmd := exec.Command("helm", args...)
+		if output, err := cmd.CombinedOutput(); err != nil {
+			return nil, nil, fmt.Errorf("pulling remote chart %s: %w\n%s", chartPath, err, string(output))
+		}
+
+		// The untarred chart will be in tempDir/<chart-name>
+		nameParts := strings.Split(ref, "/")
+		chartName := nameParts[len(nameParts)-1]
+		chartPath = filepath.Join(tempDir, chartName)
+	}
+
+	return resolveAt(chartPath, cfg.MaxDepth, 0)
 }
 
 func resolveAt(chartPath string, maxDepth, currentDepth int) ([]ResolvedDep, *ChartMetadata, error) {

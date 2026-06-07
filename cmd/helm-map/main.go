@@ -44,7 +44,8 @@ for live releases. Output formats: terminal tree, DOT, SVG, JSON.`,
 	pf := root.PersistentFlags()
 	pf.StringP("output", "o", "terminal", "Output format: terminal, dot, svg, json")
 	pf.Int("depth", 0, "Max dependency depth (0 = unlimited)")
-	pf.Bool("with-images", false, "Include container images in the graph")
+	pf.Bool("with-images", false, "Include container images in the graph (Phase 2 Preview)")
+	_ = pf.MarkHidden("with-images")
 	pf.Bool("dry-run", false, "Resolve deps without hitting cluster")
 	pf.StringP("namespace", "n", "", "Override namespace")
 	pf.String("kubeconfig", "", "Override kubeconfig path")
@@ -190,6 +191,7 @@ func flattenDeps(deps []resolver.ResolvedDep) []flatDep {
 func newReleaseCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "release <release-name>",
+		Annotations: map[string]string{"phase": "2"},
 		Short: "Resource map of a live release (Phase 2)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -203,6 +205,7 @@ func newReleaseCmd() *cobra.Command {
 func newLiveCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "live",
+		Annotations: map[string]string{"phase": "2"},
 		Short: "Map of all releases in a namespace (Phase 2)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("'helm map live' is not yet implemented — coming in Phase 2")
@@ -215,6 +218,7 @@ func newLiveCmd() *cobra.Command {
 func newPushCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "push",
+		Annotations: map[string]string{"phase": "2"},
 		Short: "Push JSON graph to helm-map.com API (Phase 2)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("'helm map push' is not yet implemented — coming in Phase 2")
