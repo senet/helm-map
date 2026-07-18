@@ -39,10 +39,6 @@ func (r *DotRenderer) Render(g *graph.Graph) ([]byte, error) {
 	buf.WriteString("  edge [fontname=\"Helvetica\" fontsize=10]\n")
 
 	// Group Release nodes by namespace for subgraph clusters; all others go inline.
-	type clusterEntry struct {
-		ns    string
-		nodes []graph.Node
-	}
 	clusterMap := make(map[string][]graph.Node)
 	var inlineNodes []graph.Node
 
