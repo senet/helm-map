@@ -33,6 +33,10 @@ func New(f Format, opts Options) Renderer {
 		return &TerminalRenderer{opts: opts}
 	case FormatJSON:
 		return &JSONRenderer{}
+	case FormatDOT:
+		return &DotRenderer{}
+	case FormatSVG:
+		return &SvgRenderer{}
 	default:
 		return &TerminalRenderer{opts: opts}
 	}

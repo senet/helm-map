@@ -6,6 +6,16 @@ updates:
       interval: weekly
     commit-message:
       prefix: "deps"
+    groups:
+      graphviz:
+        patterns:
+          - "github.com/goccy/go-graphviz"
+          - "github.com/tetratelabs/wazero"
+          - "github.com/disintegration/imaging"
+          - "github.com/flopp/go-findfont"
+          - "github.com/fogleman/gg"
+          - "github.com/golang/freetype"
+          - "golang.org/x/image"
 
   - package-ecosystem: github-actions
     directory: /

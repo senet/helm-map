@@ -179,25 +179,19 @@
 
 ### DOT Renderer (`internal/renderer/dot.go`)
 
-- [ ] Emit valid Graphviz DOT syntax
-- [ ] Node styling: shape, colour, and label based on `NodeKind`
-- [ ] Edge styling: solid for `DependsOn`/`Owns`, dashed for optional deps, labelled with `EdgeKind`
-- [ ] Emit `subgraph cluster_*` for namespace grouping when graph includes release nodes
-- [ ] Write unit tests (DOT syntax validation via `dot -Tsvg` in CI)
+- [x] Emit valid Graphviz DOT syntax
+- [x] Node styling: shape, colour, and label based on `NodeKind`
+- [x] Edge styling: solid for `DependsOn`/`Owns`, dashed for optional deps, labelled with `EdgeKind`
+- [x] Emit `subgraph cluster_*` for namespace grouping when graph includes release nodes
+- [x] Write unit tests (DOT syntax validation via `dot -Tsvg` in CI)
 
 ### SVG Renderer (`internal/renderer/svg.go`)
 
-- [ ] Implement Fruchterman-Reingold force-directed layout in pure Go
-- [ ] Render Chart nodes as rounded rectangles (blue)
-- [ ] Render Release nodes as rounded rectangles (green)
-- [ ] Render K8sResource nodes as rectangles (yellow), grouped by Kind
-- [ ] Render Image nodes as ellipses (magenta)
-- [ ] Render optional edges as dashed lines with condition label
-- [ ] Embed CSS for light/dark mode (using `prefers-color-scheme`)
-- [ ] Make nodes clickable: `onclick` opens `https://helm-map.com/node/{id}`
-- [ ] Include a legend panel (node kinds + edge types)
-- [ ] Self-contained: no external fonts, images, or scripts
-- [ ] Write unit tests (SVG well-formedness, node count validation)
+- [x] Render graph to SVG via bundled Graphviz WASM engine (github.com/goccy/go-graphviz — pure Go, no system install)
+- [x] Node styling inherited from DOT renderer (colour per NodeKind)
+- [x] Edge styling inherited from DOT renderer (dashed for optional/conditional deps)
+- [x] Self-contained: no external fonts, images, or scripts (Graphviz WASM embedded)
+- [x] Write unit tests (SVG well-formedness, node count validation)
 
 ### OCI distribution
 
@@ -210,8 +204,8 @@
 
 ### Documentation
 
-- [ ] Add `--output dot` and `--output svg` examples to `README.md`
-- [ ] Add "Piping to Graphviz" section to docs
+- [x] Add `--output dot` and `--output svg` examples to `README.md`
+- [x] Add "Piping to Graphviz" section to docs
 - [ ] Add rendered example SVG to `README.md`
 - [ ] Write `CHANGELOG.md` for v0.3.0
 

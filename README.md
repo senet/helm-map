@@ -16,7 +16,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full design details.
 ## Features
 
 - **Chart dependency graph** — recursively resolve and display chart dependencies from `Chart.yaml` / `Chart.lock`
-- **Multiple output formats** — terminal tree (ANSI coloured), JSON (machine-readable), DOT and SVG (coming soon)
+- **Multiple output formats** — terminal tree (ANSI coloured), JSON (machine-readable), DOT (Graphviz-compatible), SVG (natively rendered — no system Graphviz required)
 - **Conditional dependencies** — shows `condition` and `tags` annotations on optional deps
 - **Lock file support** — uses pinned versions from `Chart.lock` when available
 - **Legacy support** — reads `requirements.yaml` for Helm v2 charts
@@ -82,6 +82,29 @@ helm map chart ./my-chart --depth 2
 # JSON output
 helm map chart ./my-chart --output json
 ```
+
+### DOT output (Graphviz)
+
+```bash
+# Emit Graphviz DOT to stdout
+helm map chart ./my-chart --output dot
+
+# Pipe directly through Graphviz for PNG/PDF/etc.
+helm map chart ./my-chart --output dot | dot -Tpng -o graph.png
+helm map chart ./my-chart --output dot | dot -Tpdf -o graph.pdf
+```
+
+### SVG output (self-contained)
+
+```bash
+# Produce a standalone SVG — no system Graphviz required
+helm map chart ./my-chart --output svg > graph.svg
+
+# Open in browser
+helm map chart ./my-chart --output svg > graph.svg && xdg-open graph.svg
+```
+
+SVG rendering uses a bundled Graphviz WASM engine ([go-graphviz](https://github.com/goccy/go-graphviz)), so the binary is fully self-contained across Linux, macOS, and Windows.
 
 ### Flat dependency list
 
